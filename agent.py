@@ -38,7 +38,7 @@ def vector_search(prompt: str, pdf_path: Annotated[str, InjectedState("pdf_path"
     Returns:
         list[str]: retrieved context
     """
-    return perform_similarity_search(prompt = prompt, pdf_path = pdf_path)
+    return perform_similarity_search(prompt = prompt, pdf_path = pdf_path, k = 6)
     
 
 tools = [vector_search]
@@ -56,6 +56,8 @@ def create_embeddings(state: AgentState) -> AgentState:
     if collection_exists(state["pdf_path"]):
         log_info("Collection already exists")
         return state
+    else:
+        log_info(f"Creating collection for {state["pdf_path"]}")
     
     ack = create_vector_store(state["pdf_path"])
     log_info(f"{'Vector DB loaded' if ack else 'Vector DB NOT loaded'}")

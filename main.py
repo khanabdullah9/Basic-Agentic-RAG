@@ -13,7 +13,7 @@ while True:
 
     response = agent.invoke(dict(
         messages = [HumanMessage(content = prompt)],
-        pdf_path = os.path.join("DOCS","HP1.pdf")
+        pdf_path = os.path.join("DOCS","GAN.pdf")
     ))
     if response:
         for idx, msg in enumerate(response["messages"]):

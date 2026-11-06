@@ -34,7 +34,13 @@ def create_vector_store(pdf_path: str) -> bool:
     try:
         loader = PyPDFLoader(pdf_path)
         documents = loader.load()
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size = 500, chunk_overlap = 200)
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size = 1200, 
+                                                       chunk_overlap = 200,
+                                                       separators=[
+                                                        "\n\n",   # Paragraphs
+                                                        "\n",     # Lines
+                                                        ". ",     # Sentences
+                                                        ])
 
         chunks = text_splitter.split_documents(documents)
         embeddings = HuggingFaceEmbeddings(model_name = "BAAI/bge-small-en-v1.5")
@@ -76,7 +82,7 @@ def load_vector_store(pdf_path: str) -> Chroma:
 def perform_similarity_search(pdf_path: str, prompt: str, k:  int = 3) -> list[str]:
     try:
         vector_store = load_vector_store(pdf_path)
-        results = vector_store.similarity_search(query = prompt, k = 3)
+        results = vector_store.similarity_search(query = prompt, k = k)
 
         context = []
         for cont in results:
