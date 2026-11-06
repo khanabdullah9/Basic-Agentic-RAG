@@ -8,10 +8,10 @@ from langgraph.prebuilt import ToolNode, InjectedState
 import requests
 import os
 from dotenv import load_dotenv
-
+import pandas as pd
 
 from vector import collection_exists, create_vector_store, perform_similarity_search
-from utils import save_png, log_info
+from utils import save_png, log_info, log_err
 
 load_dotenv()
 
@@ -25,6 +25,7 @@ llm = ChatGroq(
 class AgentState(TypedDict):
     messages: Annotated[Sequence[BaseMessage], add_messages]
     pdf_path: str
+    excel_path: str
 
 
 @tool
@@ -41,7 +42,23 @@ def vector_search(prompt: str, pdf_path: Annotated[str, InjectedState("pdf_path"
     return perform_similarity_search(prompt = prompt, pdf_path = pdf_path, k = 6)
     
 
-tools = [vector_search]
+@tool
+def summary_stats(excel_path: Annotated[str, InjectedState("excel_path")]) -> None:
+    """Prints (STDOUT) the summary statistics of pandas dataframe.
+
+    Args:
+        excel_path (Annotated[str, InjectedState): excel path from state
+    """
+    if not os.path.exists(excel_path):
+        return
+
+    try:
+        df = pd.read_excel(excel_path)
+        print(df.describe())
+    except Exception as err:
+        log_err(err)
+
+tools = [vector_search, summary_stats]
 llm_with_tools = llm.bind_tools(tools)
 
 def create_embeddings(state: AgentState) -> AgentState:
@@ -66,11 +83,13 @@ def create_embeddings(state: AgentState) -> AgentState:
 def llm_node(state: AgentState) -> AgentState: # decision node
     sys_msg = SystemMessage(content = """
                 You are an helpful assistant!
+                You will be provided a pdf file, excel file or both.
                 You are supposed to generate responses based on retrieved context.
                 Invoke the LLM and decide which tool to call.
 
                 List of available tools:
                 1. vector_search: Performs similarity search and retrieves context based on the provided prompt.
+                2. summary_stats: Prints (STDOUT) the summary statistics of pandas dataframe.
 
                 Never respond to 'out of context' queries.
                 Only generate responses based on the retrieved context.
