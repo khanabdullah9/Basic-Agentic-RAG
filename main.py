@@ -1,10 +1,28 @@
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
 import os
+from pprint import pprint
 
 from agent import agent
 
-response = agent.invoke(dict(
-    messages = [HumanMessage(content = "What is this doc about?")],
-    pdf_path = os.path.join("DOCS","HP1.pdf")
-))
-print(response)
+while True:
+    prompt = input("Enter: ")
+    if prompt.strip().lower() == "q":
+        break
+    if prompt.strip().lower() == "cls":
+        continue
+
+    response = agent.invoke(dict(
+        messages = [HumanMessage(content = prompt)],
+        pdf_path = os.path.join("DOCS","HP1.pdf")
+    ))
+    if response:
+        for idx, msg in enumerate(response["messages"]):
+            if isinstance(msg, AIMessage):
+                pprint(f"{idx}: AIMessage")
+                pprint(msg.content)
+                pprint(msg.additional_kwargs)
+            elif isinstance(msg, ToolMessage):
+                pprint(f"{idx}: ToolMessage")
+                pprint(msg.content)
+                pprint(msg.name)
+            print("*"*100)

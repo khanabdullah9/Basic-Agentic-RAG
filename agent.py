@@ -28,17 +28,17 @@ class AgentState(TypedDict):
 
 
 @tool
-def vector_search(prompt: str, state: Annotated[AgentState, InjectedState]) -> list[str]:
+def vector_search(prompt: str, pdf_path: Annotated[str, InjectedState("pdf_path")]) -> list[str]:
     """Performs similarity search from the vector store
 
     Args:
         prompt (str): query
-        state (Annotated[AgentState, InjectedState]): Agent's state
+        pdf_path (Annotated[AgentState, InjectedState]): pdf path from agent's state
 
     Returns:
         list[str]: retrieved context
     """
-    return perform_similarity_search(prompt = prompt, pdf_path = state["pdf_path"])
+    return perform_similarity_search(prompt = prompt, pdf_path = pdf_path)
     
 
 tools = [vector_search]
