@@ -18,12 +18,4 @@ while True:
     ))
     if response:
         for idx, msg in enumerate(response["messages"]):
-            if isinstance(msg, AIMessage):
-                pprint(f"{idx}: AIMessage")
-                pprint(msg.content)
-                pprint(msg.additional_kwargs)
-            elif isinstance(msg, ToolMessage):
-                pprint(f"{idx}: ToolMessage")
-                pprint(msg.content)
-                pprint(msg.name)
-            print("*"*100)
+            msg.pretty_print()

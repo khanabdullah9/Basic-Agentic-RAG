@@ -98,7 +98,7 @@ def llm_node(state: AgentState) -> AgentState: # decision node
     
     response = llm_with_tools.invoke([sys_msg] + state["messages"])
     state["messages"].append(response)
-    log_info(response)
+    # log_info(response)
 
     return state
 
